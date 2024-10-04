@@ -4,17 +4,17 @@ import { FileImageIcon, ImageIcon, PaletteIcon } from "lucide-react";
 
 const tools = [
   {
-    title: "Image to WebP Converter",
-    href: "/tools/webp-converter",
+    title: "Image Converter",
+    href: "/tools/image-converter",
     icon: ImageIcon,
   },
   {
-    title: "shadcn UI Theme Generator",
+    title: "shadcn Theme Gen",
     href: "/tools/theme-generator",
     icon: PaletteIcon,
   },
   {
-    title: "Open Graph Thumbnail Generator",
+    title: "Open Graph Gen",
     href: "/tools/og-thumbnail-generator",
     icon: FileImageIcon,
   },
