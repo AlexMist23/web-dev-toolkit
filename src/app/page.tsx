@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FileImageIcon, ImageIcon, PaletteIcon } from "lucide-react";
+import Logo from "@/components/icons/logo";
 
 const tools = [
   {
@@ -36,18 +37,12 @@ const tools = [
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center px-4">
-      <Image
-        src="/placeholder.svg"
-        alt="Dev Toolbox"
-        width={200}
-        height={200}
-        className="mb-8"
-      />
+      <Logo className="w-72 h-72" />
       <h1 className="text-4xl font-bold mb-4">Welcome to Dev Toolbox</h1>
       <p className="text-xl mb-8 max-w-2xl text-muted-foreground">
         Your one-stop solution for essential developer tools. Boost your
-        productivity with our collection of utilities designed to streamline
-        your workflow.
+        productivity with my collection of utilities designed to streamline your
+        workflow.
       </p>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 max-w-6xl w-full">
         {tools.map((tool, index) => (
