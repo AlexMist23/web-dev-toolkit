@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="flex items-center gap-4">
           <p>{process.env.PROJECT_NAME}</p>
           <a
-            href="https://github.com/AlexMist23/portfolio-mister-alex"
+            href={`https://github.com/AlexMist23/${process.env.PROJECT_NAME}`}
             className="flex items-center gap-1 hover:text-foreground/80"
           >
             <GitHubLogoIcon />
