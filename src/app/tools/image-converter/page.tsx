@@ -2,184 +2,211 @@
 
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import Image from "next/image";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { Download, Upload, RefreshCw, Trash2 } from "lucide-react";
+import Image from "next/image";
 
-const imageFormats = ["webp", "jpg", "jpeg", "png", "avif", "ico"];
+interface ImageFile {
+  id: string;
+  file: File;
+  preview: string;
+  convertedUrl?: string;
+  isConverting: boolean;
+  conversionProgress: number;
+}
 
-export default function ImageConverterPage() {
-  const [image, setImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [convertedImage, setConvertedImage] = useState<string | null>(null);
-  const [selectedFormat, setSelectedFormat] = useState<string>("webp");
+export default function ImageConverter() {
+  const [images, setImages] = useState<ImageFile[]>([]);
   const { toast } = useToast();
 
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0];
-      if (file && file.type.startsWith("image/")) {
-        setImage(file);
-        const reader = new FileReader();
-        reader.onload = (e) => setPreview(e.target?.result as string);
-        reader.readAsDataURL(file);
-      } else {
-        toast({
-          title: "Invalid file",
-          description: "Please upload an image file.",
-          variant: "destructive",
-        });
-      }
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const newImages = acceptedFiles.map((file) => ({
+      id: Math.random().toString(36).substr(2, 9),
+      file,
+      preview: URL.createObjectURL(file),
+      isConverting: false,
+      conversionProgress: 0,
+    }));
+    setImages((prevImages) => [...prevImages, ...newImages]);
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/webp": [".webp"],
     },
-    [toast]
-  );
+  });
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-
-  const convertImage = async () => {
-    if (!image) return;
+  const convertImage = async (image: ImageFile) => {
+    setImages((prevImages) =>
+      prevImages.map((img) =>
+        img.id === image.id
+          ? { ...img, isConverting: true, conversionProgress: 0 }
+          : img
+      )
+    );
 
     const formData = new FormData();
-    formData.append("image", image);
-    formData.append("format", selectedFormat);
+    formData.append("file", image.file);
 
     try {
-      // TODO: send formData to server
-      // const response = await fetch('/api/convert-image', { method: 'POST', body: formData })
-      // const data = await response.json()
-      // setConvertedImage(data.convertedImageUrl)
-
-      setConvertedImage(preview);
-      toast({
-        title: "Conversion complete",
-        description: `Image converted to ${selectedFormat.toUpperCase()}`,
+      const response = await fetch("/api/image/converter", {
+        method: "POST",
+        body: formData,
       });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const convertedUrl = URL.createObjectURL(blob);
+        setImages((prevImages) =>
+          prevImages.map((img) =>
+            img.id === image.id
+              ? {
+                  ...img,
+                  convertedUrl,
+                  isConverting: false,
+                  conversionProgress: 100,
+                }
+              : img
+          )
+        );
+        toast({
+          title: "Conversion successful",
+          description: `${image.file.name} has been converted to WebP.`,
+        });
+      } else {
+        throw new Error("Failed to convert image");
+      }
     } catch (error) {
+      console.error("Error converting image:", error);
+      setImages((prevImages) =>
+        prevImages.map((img) =>
+          img.id === image.id
+            ? { ...img, isConverting: false, conversionProgress: 0 }
+            : img
+        )
+      );
       toast({
         title: "Conversion failed",
-        description: "An error occurred during conversion.",
+        description: `Failed to convert ${image.file.name}.`,
         variant: "destructive",
       });
     }
   };
 
+  const convertAllImages = async () => {
+    for (const image of images) {
+      if (!image.convertedUrl) {
+        await convertImage(image);
+      }
+    }
+  };
+
+  const downloadImage = (image: ImageFile) => {
+    if (image.convertedUrl) {
+      const link = document.createElement("a");
+      link.href = image.convertedUrl;
+      link.download = `${image.file.name
+        .split(".")
+        .slice(0, -1)
+        .join(".")}.webp`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const downloadAllImages = () => {
+    images.forEach((image) => {
+      if (image.convertedUrl) {
+        downloadImage(image);
+      }
+    });
+  };
+
+  const removeImage = (id: string) => {
+    setImages((prevImages) => prevImages.filter((img) => img.id !== id));
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Image Converter</h1>
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Upload Image</CardTitle>
-            <CardDescription>
-              Drag and drop an image or click to select
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div
-              {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer ${
-                isDragActive ? "border-primary" : "border-muted-foreground"
-              }`}
-            >
-              <input {...getInputProps()} />
-              {isDragActive ? (
-                <p>Drop the image here ...</p>
-              ) : (
-                <p>
-                  Drag &apos;n&apos; drop an image here, or click to select an
-                  image
-                </p>
-              )}
-            </div>
-            {preview && (
-              <div className="mt-4">
-                <Image
-                  src={preview}
-                  alt="Preview"
-                  width={300}
-                  height={300}
-                  className="mx-auto"
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Convert Image</CardTitle>
-            <CardDescription>
-              Choose a format and convert your image
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="format-select">Select Format</Label>
-                <Select
-                  onValueChange={setSelectedFormat}
-                  value={selectedFormat}
-                >
-                  <SelectTrigger id="format-select">
-                    <SelectValue placeholder="Select a format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {imageFormats.map((format) => (
-                      <SelectItem key={format} value={format}>
-                        {format.toUpperCase()}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button onClick={convertImage} disabled={!image}>
-                Convert Image
-              </Button>
-              {convertedImage && (
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold mb-2">
-                    Converted Image
-                  </h3>
-                  <Image
-                    src={convertedImage}
-                    alt="Converted"
-                    width={300}
-                    height={300}
-                    className="mx-auto"
-                  />
-                  <Button
-                    className="mt-2"
-                    onClick={() => {
-                      const link = document.createElement("a");
-                      link.href = convertedImage;
-                      link.download = `converted.${selectedFormat}`;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }}
-                  >
-                    Download Converted Image
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Image Converter</h1>
+      <div
+        {...getRootProps()}
+        className="border-2 border-dashed rounded-lg p-8 mb-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+      >
+        <input {...getInputProps()} />
+        <p>
+          {isDragActive
+            ? "Drop the images here ..."
+            : "Drag 'n' drop images here, or click to select"}
+        </p>
+        <Upload className="mx-auto mt-4" />
       </div>
+      {images.length > 0 && (
+        <div className="mb-4 flex justify-end space-x-2">
+          <Button onClick={convertAllImages}>
+            <RefreshCw className="mr-2 h-4 w-4" /> Convert All to WebP
+          </Button>
+          <Button onClick={downloadAllImages}>
+            <Download className="mr-2 h-4 w-4" /> Download All
+          </Button>
+        </div>
+      )}
+      {images.map((image) => (
+        <Card key={image.id} className="mb-4">
+          <CardContent className="flex items-center justify-between p-4">
+            <div className="flex items-center space-x-4">
+              <Image
+                src={image.preview}
+                alt={image.file.name}
+                width={64}
+                height={64}
+                objectFit="cover"
+                className="rounded"
+              />
+              <div>
+                <p className="font-semibold">{image.file.name}</p>
+                <p className="text-sm text-gray-500">
+                  {(image.file.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              {image.isConverting ? (
+                <Progress value={image.conversionProgress} className="w-24" />
+              ) : (
+                <>
+                  <Button
+                    onClick={() => convertImage(image)}
+                    disabled={!!image.convertedUrl}
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" /> Convert
+                  </Button>
+                  <Button
+                    onClick={() => downloadImage(image)}
+                    disabled={!image.convertedUrl}
+                  >
+                    <Download className="mr-2 h-4 w-4" /> Download
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => removeImage(image.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
