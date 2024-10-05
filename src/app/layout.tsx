@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import Footer from "@/components/footer";
-import Header from "@/components/header";
 import { Sidebar } from "@/components/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -35,12 +34,13 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <div className="flex h-screen flex-col">
-            <Header />
             <div className="flex flex-1 overflow-hidden">
               <Sidebar />
-              <main className="flex-1 overflow-y-auto p-6">{children}</main>
+              <main className="flex-1 overflow-y-auto p-6">
+                {children}
+                <Footer />
+              </main>
             </div>
-            <Footer />
           </div>
           <Toaster />
         </ThemeProvider>
