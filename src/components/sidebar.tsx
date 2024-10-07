@@ -12,15 +12,15 @@ import Logo from "./icons/logo";
 const tools = [
   { name: "Image Converter", href: "/tools/image-converter", icon: ImageIcon },
   {
-    name: "Open Graph Generator",
-    href: "/tools/open-graph-gen",
+    name: "Shadcn Theme Generator",
+    href: "/tools/shadcn-theme-gen",
     icon: ImagesIcon,
   },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <>
@@ -39,7 +39,7 @@ export function Sidebar() {
           <SidebarContent pathname={pathname} setIsOpen={setIsOpen} />
         </SheetContent>
       </Sheet>
-      <aside className="hidden lg:block  inset-y-0 left-0 z-30 w-[240px] border-r bg-background">
+      <aside className="hidden lg:block inset-y-0 left-0 z-30 w-[240px] border-r bg-background">
         <SidebarContent pathname={pathname} />
       </aside>
     </>
@@ -54,7 +54,7 @@ function SidebarContent({
   setIsOpen?: (open: boolean) => void;
 }) {
   return (
-    <div className="flex h-full flex-col">
+    <div className="fixed flex h-full flex-col w-[240px]">
       <div className="p-4">
         <Link
           href="/"
