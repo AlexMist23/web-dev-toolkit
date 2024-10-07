@@ -35,9 +35,9 @@ const tools = [
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center px-4">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] text-center px-4">
       <Logo className="w-72 h-72 text-foreground/90" />
-      <h1 className="text-4xl font-bold mb-4">Welcome to Dev Toolbox</h1>
+      <h1 className="text-4xl font-bold mb-4">Welcome to Dev Toolkit</h1>
       <p className="text-xl mb-8 max-w-2xl text-muted-foreground">
         Your one-stop solution for essential developer tools. Boost your
         productivity with my collection of utilities designed to streamline your
