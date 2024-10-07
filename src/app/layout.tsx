@@ -30,18 +30,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} flex antialiased min-h-screen `}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="flex h-screen flex-col">
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              <main className="flex-1 overflow-y-auto p-6">
-                {children}
-                <Footer />
-              </main>
-            </div>
-          </div>
+          <Sidebar />
+          <main className="flex flex-col flex-1 overflow-y-auto p-6 min-h-screen">
+            {children}
+            <Footer />
+          </main>
           <Toaster />
         </ThemeProvider>
       </body>
