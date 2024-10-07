@@ -15,13 +15,13 @@ const tools = [
     title: "Image to WebP Converter",
     description:
       "Convert your images to the WebP format for better performance.",
-    href: "/tools/webp-converter",
+    href: "/tools/image-converter",
     icon: ImageIcon,
   },
   {
     title: "shadcn UI Theme Generator",
     description: "Customize the colors of your shadcn UI theme.",
-    href: "/tools/theme-generator",
+    href: "/tools/shadcn-theme-gen",
     icon: PaletteIcon,
   },
   {
