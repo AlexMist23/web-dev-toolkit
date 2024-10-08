@@ -6,21 +6,22 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ImageIcon, ImagesIcon, Menu } from "lucide-react";
+import { ImagesIcon, PaletteIcon, Menu, FileImage } from "lucide-react";
 import Logo from "./icons/logo";
 
 const tools = [
-  { name: "Image Converter", href: "/tools/image-converter", icon: ImageIcon },
+  { name: "Image Converter", href: "/tools/image-converter", icon: ImagesIcon },
   {
     name: "Shadcn Theme Generator",
     href: "/tools/shadcn-theme-gen",
-    icon: ImagesIcon,
+    icon: PaletteIcon,
   },
+  { name: "Ico Generator", href: "/tools/ico-gen", icon: FileImage },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
