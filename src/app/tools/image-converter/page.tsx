@@ -55,7 +55,7 @@ export default function ImageConverter() {
     formData.append("file", image.file);
 
     try {
-      const response = await fetch("/api/image/converter", {
+      const response = await fetch("/api/tools/img-converter", {
         method: "POST",
         body: formData,
       });
